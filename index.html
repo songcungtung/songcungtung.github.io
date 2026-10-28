@@ -401,7 +401,7 @@
           </div>
           <div class="field"><label for="f-msg">Mô tả ngắn về nhu cầu</label><textarea id="f-msg" name="message" placeholder="Thương hiệu của bạn, mục tiêu, thời gian dự kiến..."></textarea></div>
           <button class="btn btn-primary" type="submit">Gửi thông tin</button>
-          <p class="form-note">Form sẽ mở ứng dụng email với nội dung đã điền sẵn. Bạn chỉ cần bấm gửi.</p>
+          <p class="form-note">Thông tin sẽ được gửi trực tiếp đến tôi. Tôi sẽ liên hệ lại sớm.</p>
         </form>
       </div>
     </div>
@@ -417,20 +417,28 @@
   // Thay [email] bên dưới bằng email thật của bạn trước khi đăng.
   const CONTACT_EMAIL = "songcungtung@gmail.com";
 
-  document.getElementById("contact-form").addEventListener("submit", function (e) {
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbzKDbCDth4SkpEp1ungVj2Mz9WaZh3CisU2jKRmEpUdmXIEI2umg5hi7LdwCnYCFbsm/exec";
+
+  document.getElementById("contact-form").addEventListener("submit", async function (e) {
     e.preventDefault();
-    const d = new FormData(this);
-    const subject = "Liên hệ từ portfolio: " + (d.get("service") || "");
-    const body = [
-      "Họ và tên: " + (d.get("name") || ""),
-      "Số điện thoại / Zalo: " + (d.get("phone") || ""),
-      "Quan tâm đến: " + (d.get("service") || ""),
-      "",
-      (d.get("message") || "")
-    ].join("\n");
-    window.location.href = "mailto:" + CONTACT_EMAIL +
-      "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(body);
+    const form = this;
+    const btn = form.querySelector('button[type="submit"]');
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Đang gửi...";
+    try {
+      await fetch(SHEET_URL, { method: "POST", mode: "no-cors", body: new FormData(form) });
+      form.reset();
+      btn.textContent = "Đã gửi, cảm ơn bạn!";
+    } catch (err) {
+      btn.textContent = "Gửi chưa thành công, thử lại nhé";
+      btn.disabled = false;
+      return;
+    }
+    setTimeout(function () {
+      btn.textContent = original;
+      btn.disabled = false;
+    }, 4000);
   });
 
   // Tạo lá rơi và ánh sáng lấp lánh (ngẫu nhiên nhẹ, không làm nặng trang)
